@@ -2,8 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
+# Token Authentication: is the type of authentication we use for users to authenticate themselves with our API.
+# It works by generating a random token string when the user logs in, and then every request we make to that API
+# we add this token string to the request, and that's effectively a password to check every request made is authenticated correctly.
+from rest_framework.authentication import TokenAuthentication
 
 from profiles_api import serializers
+from profiles_api import models
+from profiles_api import permissions
 
 class HelloApiView(APIView):
       """Test API View"""
@@ -94,3 +100,15 @@ class HelloViewSet(viewsets.ViewSet):
       def destroy(self, request, pk=None):
             """Handle removing an object"""
             return Response({'http_method': 'DELETE'})
+
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+      """Handle creating and updating profiles"""
+      serializer_class = serializers.UserProfileSerializer
+      queryset = models.UserProfile.objects.all()
+      authentication_classes = (TokenAuthentication,)
+      # Permission Class: how the user gets permission to do certain things.
+      # So, you may have an authenticated userwho has permission to do certain things or use certain APIs,
+      # but not the other APIs.
+      # You can control those fine grained permissions by using Permission classes.
+      permission_classes = (permissions.UpdateOwnProfile,)
